@@ -1,0 +1,402 @@
+import React, { useState } from 'react';
+import { Trophy, Zap, Dna, Waves, HelpCircle, Check, X, Eye, RotateCcw, Settings, BarChart } from 'lucide-react';
+
+// BANK SOAL 30 NOMOR DENGAN LEVEL KOGNITIF
+const INITIAL_QUESTIONS = [
+  // --- GELOMBANG & BUNYI & OPTIK ---
+  { id: 1, category: 'Gelombang', level: 'Pemahaman', text: 'Bunyi pantul yang terdengar sebagian bersamaan dengan bunyi asli sehingga bunyi asli menjadi tidak jelas disebut...', answer: 'Gaung / Kerdam' },
+  { id: 2, category: 'Gelombang', level: 'Aplikasi', text: 'Sebuah gelombang memiliki frekuensi 50 Hz dan panjang gelombang 2 meter. Berapakah cepat rambat gelombangnya?', answer: '100 m/s (v = λ . f)' },
+  { id: 3, category: 'Gelombang', level: 'Pemahaman', text: 'Hewan yang mampu mendengar bunyi ultrasonik (di atas 20.000 Hz) adalah...', answer: 'Kelelawar / Lumba-lumba' },
+  { id: 4, category: 'Gelombang', level: 'Penalaran', text: 'Mengapa astronaut di bulan tidak dapat saling mendengar suara secara langsung tanpa alat bantu radio?', answer: 'Karena di bulan hampa udara (tidak ada medium rambat bunyi)' },
+  { id: 5, category: 'Gelombang', level: 'Aplikasi', text: 'Seseorang berteriak di depan tebing. Bunyi pantul terdengar 2 detik kemudian. Jika cepat rambat bunyi 340 m/s, berapa jarak tebing?', answer: '340 meter (s = v.t / 2)' },
+  { id: 6, category: 'Gelombang', level: 'Pemahaman', text: 'Cacat mata rabun jauh (miopi) dapat dibantu dengan kacamata berlensa...', answer: 'Cekung (Negatif)' },
+  { id: 7, category: 'Gelombang', level: 'Penalaran', text: 'Mengapa dasar kolam renang yang jernih terlihat lebih dangkal dari kedalaman aslinya?', answer: 'Karena peristiwa Pembiasan Cahaya (Refraksi)' },
+  { id: 8, category: 'Gelombang', level: 'Aplikasi', text: 'Sebuah benda berada 10 cm di depan cermin datar. Berapakah jarak antara benda dengan bayangannya?', answer: '20 cm' },
+  { id: 9, category: 'Gelombang', level: 'Pemahaman', text: 'Bagian mata yang berfungsi mengatur jumlah cahaya yang masuk adalah...', answer: 'Pupil (dikendalikan Iris)' },
+  { id: 10, category: 'Gelombang', level: 'Penalaran', text: 'Apa yang terjadi pada frekuensi bunyi sirine ambulans yang mendekati pendengar diam? (Efek Doppler)', answer: 'Frekuensi terdengar lebih tinggi' },
+
+  // --- PEWARISAN SIFAT (GENETIKA) ---
+  { id: 11, category: 'Genetika', level: 'Pemahaman', text: 'Siapakah ilmuwan yang dikenal sebagai Bapak Genetika?', answer: 'Gregor Mendel' },
+  { id: 12, category: 'Genetika', level: 'Pemahaman', text: 'Molekul pembawa materi genetika yang berbentuk double helix adalah...', answer: 'DNA' },
+  { id: 13, category: 'Genetika', level: 'Aplikasi', text: 'Jika Bunga Merah (MM) disilangkan dengan Putih (mm) dan bersifat Intermediet, apa warna fenotipe keturunannya?', answer: 'Merah Muda (Pink)' },
+  { id: 14, category: 'Genetika', level: 'Pemahaman', text: 'Jumlah kromosom pada sel tubuh (somatis) manusia adalah ... pasang.', answer: '23 Pasang (46 buah)' },
+  { id: 15, category: 'Genetika', level: 'Penalaran', text: 'Mengapa penyakit hemofilia dan buta warna lebih banyak diderita oleh laki-laki daripada perempuan?', answer: 'Karena terpaut kromosom X (Gen resesif pada kromosom X)' },
+  { id: 16, category: 'Genetika', level: 'Pemahaman', text: 'Sifat yang menutupi sifat lain dalam persilangan disebut sifat...', answer: 'Dominan' },
+  { id: 17, category: 'Genetika', level: 'Aplikasi', text: 'Seorang ayah bergolongan darah A (homozigot) menikah dengan ibu bergolongan darah O. Apa golongan darah anak-anaknya?', answer: 'Semua Golongan Darah A (Heterozigot)' },
+  { id: 18, category: 'Genetika', level: 'Pemahaman', text: 'Sel sperma dan sel telur (gamet) bersifat haploid, artinya memiliki kromosom sebanyak...', answer: 'n (Setengah dari sel tubuh)' },
+  { id: 19, category: 'Genetika', level: 'Penalaran', text: 'Dua orang tua normal melahirkan anak albino. Bagaimana genotipe kedua orang tuanya?', answer: 'Keduanya Carrier (Heterozigot / Aa)' },
+  { id: 20, category: 'Genetika', level: 'Aplikasi', text: 'Pada persilangan Dihibrid (BbKk x BbKk), berapakah rasio fenotipe F2 menurut Hukum Mendel II?', answer: '9 : 3 : 3 : 1' },
+
+  // --- LISTRIK DINAMIS & STATIS ---
+  { id: 21, category: 'Listrik', level: 'Pemahaman', text: 'Satuan Internasional (SI) untuk kuat arus listrik adalah...', answer: 'Ampere' },
+  { id: 22, category: 'Listrik', level: 'Pemahaman', text: 'Alat untuk menaikkan atau menurunkan tegangan listrik AC adalah...', answer: 'Transformator (Trafo)' },
+  { id: 23, category: 'Listrik', level: 'Aplikasi', text: 'Sebuah lampu dialiri arus 2 A dengan tegangan 10 V. Berapakah dayanya?', answer: '20 Watt (P = V . I)' },
+  { id: 24, category: 'Listrik', level: 'Pemahaman', text: 'Bahan yang sangat sulit menghantarkan arus listrik disebut...', answer: 'Isolator' },
+  { id: 25, category: 'Listrik', level: 'Aplikasi', text: 'Dua resistor masing-masing 6 Ohm dirangkai secara SERI. Berapa hambatan penggantinya?', answer: '12 Ohm' },
+  { id: 26, category: 'Listrik', level: 'Penalaran', text: 'Mengapa lampu-lampu di rumah tangga dipasang secara paralel, bukan seri?', answer: 'Agar jika satu mati yang lain tetap nyala & tegangan sama' },
+  { id: 27, category: 'Listrik', level: 'Penalaran', text: 'Apa yang terjadi pada daun elektroskop netral jika didekati benda bermuatan negatif?', answer: 'Daun elektroskop akan mekar (terbuka)' },
+  { id: 28, category: 'Listrik', level: 'Aplikasi', text: 'Rumus menghitung biaya listrik adalah Energi (kWh) dikali...', answer: 'Tarif per kWh' },
+  { id: 29, category: 'Listrik', level: 'Penalaran', text: 'Mengapa burung yang bertengger di satu kabel tegangan tinggi tidak tersengat listrik?', answer: 'Karena tidak ada beda potensial (arus tidak mengalir)' },
+  { id: 30, category: 'Listrik', level: 'Pemahaman', text: 'Sumber arus listrik searah yang mengubah energi kimia menjadi listrik adalah...', answer: 'Baterai / Akumulator (Aki)' },
+];
+
+const ScienceReviewGame = () => {
+  const [phase, setPhase] = useState('setup'); // setup, game, victory
+  const [targetWord, setTargetWord] = useState('KOMPETENSI');
+  const [teams, setTeams] = useState([
+    { id: 1, name: 'Tim Newton', letters: [], color: 'bg-red-100 border-red-500 text-red-800' },
+    { id: 2, name: 'Tim Mendel', letters: [], color: 'bg-blue-100 border-blue-500 text-blue-800' },
+    { id: 3, name: 'Tim Einstein', letters: [], color: 'bg-green-100 border-green-500 text-green-800' },
+    { id: 4, name: 'Tim Tesla', letters: [], color: 'bg-yellow-100 border-yellow-500 text-yellow-800' },
+    { id: 5, name: 'Tim Habibie', letters: [], color: 'bg-purple-100 border-purple-500 text-purple-800' },
+  ]);
+  
+  const [questions, setQuestions] = useState(INITIAL_QUESTIONS);
+  const [answeredIds, setAnsweredIds] = useState([]);
+  const [currentQuestion, setCurrentQuestion] = useState(null);
+  const [isAnswerRevealed, setIsAnswerRevealed] = useState(false);
+  const [winner, setWinner] = useState(null);
+  const [modalMessage, setModalMessage] = useState(null);
+
+  // Helper functions
+  const checkVictory = (teamLetters) => {
+    const targetLetters = targetWord.split('');
+    const inventory = [...teamLetters];
+    for (let char of targetLetters) {
+      const index = inventory.indexOf(char);
+      if (index === -1) return false;
+      inventory.splice(index, 1);
+    }
+    return true;
+  };
+
+  const handleStartGame = () => {
+    if (!targetWord) return;
+    setPhase('game');
+  };
+
+  const handleRestartGame = () => {
+    if (window.confirm("Yakin ingin memulai ulang? Semua skor dan huruf akan dihapus.")) {
+      setPhase('setup');
+      setAnsweredIds([]);
+      setWinner(null);
+      setModalMessage(null);
+      // Reset team letters but keep names
+      setTeams(teams.map(t => ({ ...t, letters: [] })));
+    }
+  };
+
+  const handleQuestionClick = (q) => {
+    if (answeredIds.includes(q.id)) return;
+    setCurrentQuestion(q);
+    setIsAnswerRevealed(false);
+  };
+
+  const giveLetterToTeam = (teamIndex) => {
+    const team = teams[teamIndex];
+    const targetLetters = targetWord.split('');
+    
+    // Logic pemberian huruf: Prioritaskan huruf yang belum punya, jika sudah lengkap beri acak
+    const currentInventory = [...team.letters];
+    const tempTarget = [...targetLetters];
+    currentInventory.forEach(char => {
+      const idx = tempTarget.indexOf(char);
+      if (idx > -1) tempTarget.splice(idx, 1);
+    });
+
+    let newLetter = '';
+    if (tempTarget.length > 0) {
+      const randomIndex = Math.floor(Math.random() * tempTarget.length);
+      newLetter = tempTarget[randomIndex];
+    } else {
+      newLetter = targetLetters[Math.floor(Math.random() * targetLetters.length)];
+    }
+
+    const newTeams = [...teams];
+    newTeams[teamIndex].letters.push(newLetter);
+    setTeams(newTeams);
+
+    setModalMessage({
+      title: `Hebat ${team.name}!`,
+      text: `Kalian mendapatkan huruf: "${newLetter}"`,
+      type: 'success'
+    });
+
+    setCurrentQuestion(null);
+    setAnsweredIds([...answeredIds, currentQuestion.id]);
+
+    if (checkVictory(newTeams[teamIndex].letters)) {
+      setWinner(newTeams[teamIndex]);
+      setPhase('victory');
+      setModalMessage(null);
+    }
+  };
+
+  const closeMessageModal = () => {
+    setModalMessage(null);
+  };
+
+  const getLevelColor = (level) => {
+    switch(level) {
+      case 'Pemahaman': return 'bg-blue-100 text-blue-700 border-blue-300';
+      case 'Aplikasi': return 'bg-yellow-100 text-yellow-700 border-yellow-300';
+      case 'Penalaran': return 'bg-red-100 text-red-700 border-red-300';
+      default: return 'bg-gray-100';
+    }
+  };
+
+  // --- RENDER SECTIONS ---
+
+  // 1. Setup Screen
+  if (phase === 'setup') {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 font-sans text-slate-100">
+        <div className="bg-white text-slate-800 p-8 rounded-2xl shadow-2xl max-w-2xl w-full">
+          <h1 className="text-3xl font-bold text-center mb-6 text-indigo-700 flex items-center justify-center gap-2">
+            <Settings className="w-8 h-8" /> Pengaturan Game
+          </h1>
+          
+          <div className="mb-6">
+            <label className="block text-sm font-bold mb-2">Kata Rahasia (Target)</label>
+            <input 
+              type="text" 
+              value={targetWord}
+              onChange={(e) => setTargetWord(e.target.value.toUpperCase().replace(/[^A-Z]/g, ''))}
+              className="w-full p-3 border-2 border-indigo-200 rounded-lg text-2xl tracking-widest font-mono text-center uppercase"
+              placeholder="CONTOH: KROMOSOM"
+            />
+            <p className="text-sm text-gray-500 mt-2">Pastikan jumlah huruf sesuai durasi waktu main.</p>
+          </div>
+
+          <div className="mb-6">
+            <label className="block text-sm font-bold mb-2">Nama Tim</label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {teams.map((t, i) => (
+                <input 
+                  key={t.id}
+                  type="text"
+                  value={t.name}
+                  onChange={(e) => {
+                    const newTeams = [...teams];
+                    newTeams[i].name = e.target.value;
+                    setTeams(newTeams);
+                  }}
+                  className={`p-2 border rounded ${t.color.split(' ')[0]}`}
+                />
+              ))}
+            </div>
+          </div>
+
+          <button 
+            onClick={handleStartGame}
+            disabled={!targetWord}
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl text-xl transition-all shadow-lg transform hover:scale-105"
+          >
+            Mulai Permainan
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // 2. Victory Screen
+  if (phase === 'victory') {
+    return (
+      <div className="min-h-screen bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 flex items-center justify-center p-4 text-white text-center animate-pulse">
+        <div className="bg-white/20 backdrop-blur-lg p-12 rounded-3xl shadow-xl">
+          <Trophy className="w-32 h-32 mx-auto mb-6 text-yellow-200" />
+          <h1 className="text-6xl font-black mb-4">SELAMAT!</h1>
+          <h2 className="text-4xl font-bold mb-8">{winner?.name} Menang!</h2>
+          <p className="text-2xl mb-8">Berhasil menyusun kata: <span className="font-mono bg-black/30 px-4 py-2 rounded">{targetWord}</span></p>
+          <button 
+            onClick={handleRestartGame}
+            className="bg-white text-pink-600 px-8 py-3 rounded-full font-bold text-xl hover:bg-gray-100"
+          >
+            Main Lagi
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // 3. Main Game Screen
+  return (
+    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
+      {/* Header */}
+      <header className="bg-indigo-700 text-white p-4 shadow-lg sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <h1 className="text-lg md:text-2xl font-bold flex items-center gap-2">
+            <Dna className="w-6 h-6" /> Review IPA Kelas 9
+          </h1>
+          <div className="flex items-center gap-4">
+            <div className="text-sm font-mono bg-indigo-800 px-3 py-1 rounded hidden sm:block">
+              Target: {targetWord.length} Huruf
+            </div>
+            <button 
+              onClick={handleRestartGame}
+              className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg flex items-center gap-1 text-sm font-bold transition-colors"
+              title="Mulai Ulang"
+            >
+              <RotateCcw size={16} /> <span className="hidden sm:inline">Reset</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main className="flex-grow p-4 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        {/* Left: Question Grid (30 Soal) */}
+        <div className="lg:col-span-2">
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 h-full">
+            <h2 className="text-lg font-bold mb-4 text-slate-700 flex items-center gap-2">
+              <HelpCircle className="w-5 h-5 text-indigo-500" /> Pilih Nomor Misi
+            </h2>
+            {/* Grid disesuaikan untuk 30 soal */}
+            <div className="grid grid-cols-5 sm:grid-cols-6 gap-2 sm:gap-3">
+              {questions.map((q) => {
+                const isAnswered = answeredIds.includes(q.id);
+                let icon = <HelpCircle size={14} />;
+                if (q.category === 'Listrik') icon = <Zap size={14} />;
+                if (q.category === 'Gelombang') icon = <Waves size={14} />;
+                if (q.category === 'Genetika') icon = <Dna size={14} />;
+
+                return (
+                  <button
+                    key={q.id}
+                    onClick={() => handleQuestionClick(q)}
+                    disabled={isAnswered}
+                    className={`
+                      aspect-square flex flex-col items-center justify-center rounded-lg transition-all duration-300 relative overflow-hidden group
+                      ${isAnswered 
+                        ? 'bg-slate-200 text-slate-400 cursor-not-allowed' 
+                        : 'bg-white border-2 border-indigo-100 hover:border-indigo-500 hover:shadow-md hover:-translate-y-1 text-indigo-700'
+                      }
+                    `}
+                  >
+                    <span className="text-xl sm:text-2xl font-black mb-1">{q.id}</span>
+                    <div className="absolute top-1 right-1 opacity-40">
+                      {icon}
+                    </div>
+                    {/* Indikator Level (Dot kecil) */}
+                    <div className={`absolute bottom-1 w-2 h-2 rounded-full 
+                      ${q.level === 'Pemahaman' ? 'bg-blue-400' : 
+                        q.level === 'Aplikasi' ? 'bg-yellow-400' : 'bg-red-400'
+                      }`} 
+                    />
+                  </button>
+                );
+              })}
+            </div>
+            <div className="mt-4 flex gap-4 text-xs text-slate-500 justify-center">
+              <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-blue-400"></div> Pemahaman</span>
+              <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-yellow-400"></div> Aplikasi</span>
+              <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-red-400"></div> Penalaran</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Right: Team Status */}
+        <div className="lg:col-span-1 space-y-4">
+          {teams.map((team, idx) => (
+            <div key={team.id} className={`p-4 rounded-xl border-l-8 shadow-sm bg-white ${team.color.replace('bg-', 'border-')}`}>
+              <div className="flex justify-between items-start mb-2">
+                <h3 className="font-bold text-lg text-slate-800">{team.name}</h3>
+                <span className="text-xs bg-slate-100 px-2 py-1 rounded text-slate-500 font-mono">
+                  {team.letters.length} Huruf
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-1 min-h-[40px] bg-slate-50 p-2 rounded-lg border-inner">
+                {team.letters.length === 0 && <span className="text-xs text-slate-400 italic">Belum ada huruf...</span>}
+                {team.letters.map((char, i) => (
+                  <span key={i} className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center bg-slate-800 text-white font-mono font-bold rounded shadow-sm animate-bounce-short text-sm sm:text-base">
+                    {char}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </main>
+
+      {/* 1. Question Modal */}
+      {currentQuestion && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="bg-indigo-600 p-4 flex justify-between items-center text-white shrink-0">
+              <div className="flex flex-col">
+                <span className="font-bold uppercase tracking-wider flex items-center gap-2 text-sm opacity-90">
+                  {currentQuestion.category} • No. {currentQuestion.id}
+                </span>
+                <span className={`text-xs mt-1 px-2 py-0.5 rounded w-fit font-bold bg-white/20`}>
+                  Tingkat: {currentQuestion.level}
+                </span>
+              </div>
+              <button onClick={() => setCurrentQuestion(null)} className="hover:bg-white/20 p-1 rounded"><X /></button>
+            </div>
+            
+            <div className="p-6 sm:p-8 text-center overflow-y-auto">
+              <h3 className="text-xl sm:text-2xl font-medium text-slate-800 mb-8 leading-relaxed">
+                {currentQuestion.text}
+              </h3>
+              
+              {isAnswerRevealed ? (
+                <div className="bg-green-50 border border-green-200 p-6 rounded-xl mb-8 animate-in fade-in slide-in-from-bottom-4">
+                  <p className="text-sm text-green-600 font-bold uppercase mb-1">Jawaban</p>
+                  <p className="text-2xl sm:text-3xl font-black text-green-800">{currentQuestion.answer}</p>
+                </div>
+              ) : (
+                <div className="h-32 flex items-center justify-center border-2 border-dashed border-slate-200 rounded-xl mb-8">
+                  <button 
+                    onClick={() => setIsAnswerRevealed(true)}
+                    className="flex items-center gap-2 text-slate-500 hover:text-indigo-600 transition-colors"
+                  >
+                    <Eye size={24} /> Lihat Jawaban
+                  </button>
+                </div>
+              )}
+
+              <div className="border-t pt-6">
+                <p className="text-slate-500 mb-4 text-sm font-medium">Siapa yang menjawab benar?</p>
+                <div className="flex flex-wrap justify-center gap-3">
+                  {teams.map((team, index) => (
+                    <button
+                      key={team.id}
+                      onClick={() => giveLetterToTeam(index)}
+                      className={`px-4 py-2 rounded-lg font-bold text-sm transition-all hover:scale-105 active:scale-95 border-b-4 ${team.color} border-opacity-50`}
+                    >
+                      {team.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 2. Notification Modal */}
+      {modalMessage && !currentQuestion && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 pointer-events-none">
+          <div className="bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full pointer-events-auto border-4 border-green-400 transform animate-bounce-in">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Check size={32} strokeWidth={4} />
+              </div>
+              <h3 className="text-xl font-bold text-slate-800 mb-2">{modalMessage.title}</h3>
+              <p className="text-slate-600 mb-6 text-lg">{modalMessage.text}</p>
+              <button 
+                onClick={closeMessageModal}
+                className="w-full bg-slate-800 text-white font-bold py-3 rounded-lg hover:bg-slate-900"
+              >
+                Lanjut Main
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+};
+
+export default ScienceReviewGame;
